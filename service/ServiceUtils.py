@@ -1,5 +1,5 @@
-from pymongo import MongoClient
 import csv
+import repository.RepositoryUtils as repo
 
 
 def generateCSVFile(requiredStockList, collectionName, identifier):
@@ -31,10 +31,7 @@ def generateCSVFile(requiredStockList, collectionName, identifier):
 
 
 def processFileCreation(identifier, collectionName):
-    client = MongoClient("localhost", 27017)
-    database = client["central-db"]
-    collection = database[collectionName]
-    entireCollectionData = collection.find()
+    entireCollectionData = repo.getCollectionData(collectionName)
     requiredStockList = list()
     for entity in entireCollectionData:
         listOfAllStocksOnCurrentEntry = entity["stockData"]
@@ -50,10 +47,7 @@ def generateCollectionName(day, month, year):
 
 
 def processAllFileCreations(collectionName):
-    client = MongoClient("localhost", 27017)
-    database = client["central-db"]
-    collection = database[collectionName]
-    listOfStocks = collection.distinct("stockData.symbol")
+    listOfStocks = repo.getDistinctNamesOfStock(collectionName)
     listOfStocks.remove("NIFTY 50")
     for currentStock in listOfStocks:
         processFileCreation(currentStock, collectionName)
